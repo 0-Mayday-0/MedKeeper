@@ -1,4 +1,3 @@
-import asyncio
 
 from dotenv import load_dotenv
 from os import getenv
@@ -46,4 +45,4 @@ async def main() -> None:
     print(client_status)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    run(main())
