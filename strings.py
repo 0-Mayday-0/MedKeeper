@@ -1,14 +1,22 @@
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
+class Connections:
+    protocol: str = 'mongodb+srv'
+    root_domain: str = 'mongodb'
+    top_domain: str = 'net'
+
+    cluster: str = "CLUSTER"
+    username: str = "USERNAME"
+    password: str = "PASSWORD"
+    cluster_id: str = "CLUSTER_ID"
+    database: str = "DB"
+
+@dataclass(frozen=True)
 class Menu:
     @dataclass(frozen=True)
     class Internal:
-        cluster: str = "CLUSTER"
-        username: str = "USERNAME"
-        password: str = "PASSWORD"
-        cluster_id: str = "CLUSTER_ID"
-        database: str = "DB"
+
 
         add_medication: str = 'a'
         subtract_stock: str = 's'

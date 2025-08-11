@@ -13,8 +13,8 @@ class Menu:
         load_dotenv(env_path)
 
         self.env_path = env_path
-        self.cluster: str = getenv(s.Menu.Internal.cluster)
-        self.database: str = getenv(s.Menu.Internal.database)
+        self.cluster: str = getenv(s.Connections.cluster)
+        self.database: str = getenv(s.Connections.database)
 
         self.commands: dict[str, Callable] = {
             s.Menu.Internal.add_medication: self._add_medication,

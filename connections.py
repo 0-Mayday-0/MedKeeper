@@ -5,18 +5,19 @@ from pymongo import MongoClient
 from asyncio import run, create_task, to_thread
 from asyncio import Task
 from collections.abc import Coroutine
+import strings as s
 
 class ConnectionString:
     def __init__(self, env_path: str) -> None:
         load_dotenv(env_path)
-        self.protocol: str = 'mongodb+srv'
-        self.user: str = getenv("USERNAME").lower()
-        self.password: str = getenv("PASSWORD")
-        self.cluster: str = getenv("CLUSTER")
-        self.cluster_id: str = getenv("CLUSTER_ID")
-        self.db: str = getenv("DB")
-        self.root_domain: str = 'mongodb'
-        self.top_domain: str = 'net'
+        self.protocol: str = s.Connections.protocol
+        self.user: str = getenv(s.Connections.username).lower()
+        self.password: str = getenv(s.Connections.password)
+        self.cluster: str = getenv(s.Connections.cluster)
+        self.cluster_id: str = getenv(s.Connections.cluster_id)
+        self.db: str = getenv(s.Connections.database)
+        self.root_domain: str = s.Connections.root_domain
+        self.top_domain: str = s.Connections.top_domain
 
     def __str__(self) -> str:
         return (f"{self.protocol}://{self.user}:"
@@ -36,7 +37,7 @@ class ClientCreator:
 
 
 async def main() -> None:
-    client_obj = ClientCreator(env_path=".\\credentials\\creds.env")
+    client_obj = ClientCreator(env_path=s.Paths.environment_path)
 
     client_task: Task[Coroutine[None, MongoClient[str], MongoClient]] = create_task(client_obj.connect_db())
 
