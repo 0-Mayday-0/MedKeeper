@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from os import getenv
 
+from pymongo.results import InsertOneResult
 from pymongo.synchronous.collection import Collection
 from pymongo.synchronous.database import Database
 
@@ -11,6 +12,9 @@ from connections import ClientCreator
 from collections.abc import Coroutine, Callable
 from asyncio import Task, create_task, run
 from icecream import ic
+from decimal import InvalidOperation, Decimal
+
+from medobj import Medication
 
 
 class Menu:
@@ -49,8 +53,36 @@ class Menu:
 
         self.connected: bool = bool(self.client)
 
-    def _add_medication(self):
-        raise NotImplementedError(s.Menu.Internal.add_medication)
+    def _check_valid_add(self, packed: dict[str, str]) -> Medication | None:
+        try:
+            assert packed['name'].isalpha()
+            packed['name'] = packed['name'].title()
+        except AssertionError:
+            print("The name of the medication must only contain letters.")
+
+        try:
+            med_object: Medication = Medication(*packed.values())
+        except InvalidOperation:
+            return None
+
+        return med_object
+
+    def _add_medication(self) -> InsertOneResult | None:
+        prompts: tuple[str, str, str] = ("Enter the name of the medication: ",
+                                         "Enter the strength of the medication: ",
+                                         "Enter the current stock: ")
+
+        user_packed: dict[str, str] = {'name': '', 'strength': '', 'qty': ''}
+
+        for prompt, key in zip(prompts, user_packed.keys()):
+            user_packed[key] = input(prompt)
+
+        med_object = self._check_valid_add(user_packed)
+
+        if not med_object:
+            print("One of the values entered has invalid characters.")
+        else:
+            print(f'Inserted med with ID: {self.collection.insert_one(med_object.__dict__()).inserted_id}')
 
     def _subtract_stock(self):
         raise NotImplementedError(s.Menu.Internal.subtract_string)

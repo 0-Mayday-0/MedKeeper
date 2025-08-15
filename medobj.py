@@ -4,9 +4,18 @@ from decimal import getcontext
 class Medication:
     def __init__(self, name: str, strength: float | int, qty: float | int, ndecimals: int = 2) -> None:
         getcontext().prec = int(ndecimals)
+        self.ndecimals: int = ndecimals
         self.name: str = name
         self.strength: Decimal = Decimal(strength)
         self.qty: Decimal = Decimal(qty)
+
+    def __repr__(self) -> str:
+        return f'Med({self.name=}, {self.strength=}, {self.qty=})'
+
+    def __dict__(self) -> dict:
+        return {'name': self.name,
+                'strength': round(float(self.strength), self.ndecimals),
+                'qty': round(float(self.qty), self.ndecimals)}
 
     @property
     def get_name(self) -> str:
