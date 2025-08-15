@@ -11,6 +11,7 @@ class Connections:
     password: str = "PASSWORD"
     cluster_id: str = "CLUSTER_ID"
     database: str = "DB"
+    collection: str = "COLLECTION"
 
 @dataclass(frozen=True)
 class Menu:

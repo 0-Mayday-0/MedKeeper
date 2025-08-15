@@ -2,10 +2,15 @@
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from os import getenv
+
+from pymongo.synchronous.collection import Collection
+from pymongo.synchronous.database import Database
+
 import strings as s
 from connections import ClientCreator
 from collections.abc import Coroutine, Callable
 from asyncio import Task, create_task, run
+from icecream import ic
 
 
 class Menu:
@@ -15,6 +20,7 @@ class Menu:
         self.env_path = env_path
         self.cluster: str = getenv(s.Connections.cluster)
         self.database: str = getenv(s.Connections.database)
+        self.col: str = getenv(s.Connections.collection)
 
         self.commands: dict[str, Callable] = {
             s.Menu.Internal.add_medication: self._add_medication,
@@ -35,12 +41,16 @@ class Menu:
                                             s.Menu.Internal.quit_string
                                             ]
 
-        self.db: MongoClient | None = None
+        self.client: MongoClient | None = None
 
-        self.connected: bool = bool(self.db)
+        self.db: Database | None = None
+
+        self.collection: Collection | None = None
+
+        self.connected: bool = bool(self.client)
 
     def _add_medication(self):
-        raise NotImplementedError(s.Menu.Internal.add_string)
+        raise NotImplementedError(s.Menu.Internal.add_medication)
 
     def _subtract_stock(self):
         raise NotImplementedError(s.Menu.Internal.subtract_string)
@@ -67,13 +77,16 @@ class Menu:
         return client_status
 
     async def _check_connected(self) -> None:
-        self.connected: bool = bool(self.db)
+        self.connected: bool = bool(self.client)
         if self.connected:
             pass
         else:
             awaitable_connect: Coroutine[None, MongoClient[str], MongoClient] = await self._connect()
-            self.db: Coroutine[None, MongoClient[str], MongoClient] = awaitable_connect
-            self.connected = bool(self.db)
+            self.client: Coroutine[None, MongoClient[str], MongoClient] = awaitable_connect
+            self.connected = bool(self.client)
+
+            self.db = self.client[self.database]
+            self.collection = self.db[self.col]
 
 
 
@@ -88,7 +101,7 @@ class Menu:
                 user_input = input(f'\n{s.Menu.External.command_prompt}').lower()
 
                 try:
-                    self.commands[user_input]()
+                    ic(self.commands[user_input]())
 
                 except NotImplementedError as e:
                     print(f'{s.Menu.External.NOT_IMPLEMENTED}:\n{str(e)}', end='\n\n')
