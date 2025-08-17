@@ -53,12 +53,13 @@ class Menu:
 
         self.connected: bool = bool(self.client)
 
-    def _check_valid_add(self, packed: dict[str, str]) -> Medication | None:
+    @staticmethod
+    def _check_valid_add(packed: dict[str, str]) -> Medication | None:
         try:
-            assert packed['name'].isalpha()
-            packed['name'] = packed['name'].title()
+            assert packed[s.Connections.name_str].isalpha()
+            packed[s.Connections.name_str] = packed[s.Connections.name_str].title()
         except AssertionError:
-            print("The name of the medication must only contain letters.")
+            print(s.Menu.External.ONLY_LETTERS)
 
         try:
             med_object: Medication = Medication(*packed.values())
@@ -67,12 +68,12 @@ class Menu:
 
         return med_object
 
-    def _add_medication(self) -> InsertOneResult | None:
-        prompts: tuple[str, str, str] = ("Enter the name of the medication: ",
-                                         "Enter the strength of the medication: ",
-                                         "Enter the current stock: ")
+    def _add_medication(self) -> None:
+        prompts: tuple[str, str, str] = s.Menu.External.add_med_prompts
 
-        user_packed: dict[str, str] = {'name': '', 'strength': '', 'qty': ''}
+        user_packed: dict[str, str] = {s.Connections.name_str: '',
+                                       s.Connections.strength_str: '',
+                                       s.Connections.qty_str: ''}
 
         for prompt, key in zip(prompts, user_packed.keys()):
             user_packed[key] = input(prompt)
@@ -80,9 +81,10 @@ class Menu:
         med_object = self._check_valid_add(user_packed)
 
         if not med_object:
-            print("One of the values entered has invalid characters.")
+            print(s.Menu.External.INVALID_CHARACTERS)
         else:
-            print(f'Inserted med with ID: {self.collection.insert_one(med_object.__dict__()).inserted_id}')
+            insert_result: InsertOneResult = self.collection.insert_one(med_object.__dict__())
+            print(f'{s.Menu.External.INSERTED_SUCCESS} {insert_result.inserted_id}')
 
     def _subtract_stock(self):
         raise NotImplementedError(s.Menu.Internal.subtract_string)
@@ -127,7 +129,7 @@ class Menu:
         user_input: str = ''
 
         if self.connected:
-            while user_input != 'q':
+            while user_input != s.Menu.Internal.quit_program:
                 for k, v in zip(self.commands.keys(), self.commands_strings):
                     print(f'{k.upper()}: {v}')
                 user_input = input(f'\n{s.Menu.External.command_prompt}').lower()
