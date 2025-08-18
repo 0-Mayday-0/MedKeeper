@@ -31,6 +31,8 @@ class Menu:
         edit_medication: str = 'c'
         quit_program: str = 'q'
 
+        clear_command: str = 'cmd /c cls'
+
         add_string: str = "Add a medication"
         subtract_string: str = "Subtract from stock"
         add_stock_string: str = "Add to stock"

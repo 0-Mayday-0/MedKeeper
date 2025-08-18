@@ -13,6 +13,7 @@ from collections.abc import Coroutine, Callable
 from asyncio import Task, create_task, run
 from icecream import ic
 from decimal import InvalidOperation, Decimal
+from subprocess import call as spcall
 
 from medobj import Medication
 
@@ -54,12 +55,16 @@ class Menu:
         self.connected: bool = bool(self.client)
 
     @staticmethod
+    def clear_screen() -> None:
+        r = spcall(s.Menu.Internal.clear_command)
+
+    @staticmethod
     def _check_valid_add(packed: dict[str, str]) -> Medication | None:
         try:
             assert packed[s.Connections.name_str].isalpha()
             packed[s.Connections.name_str] = packed[s.Connections.name_str].title()
         except AssertionError:
-            print(s.Menu.External.ONLY_LETTERS)
+            print(s.Menu.External.ONLY_LETTERS, end='\n\n')
 
         try:
             med_object: Medication = Medication(*packed.values())
@@ -69,6 +74,7 @@ class Menu:
         return med_object
 
     def _add_medication(self) -> None:
+        self.clear_screen()
         prompts: tuple[str, str, str] = s.Menu.External.add_med_prompts
 
         user_packed: dict[str, str] = {s.Connections.name_str: '',
@@ -81,10 +87,11 @@ class Menu:
         med_object = self._check_valid_add(user_packed)
 
         if not med_object:
-            print(s.Menu.External.INVALID_CHARACTERS)
+            print(s.Menu.External.INVALID_CHARACTERS, end='\n\n')
         else:
             insert_result: InsertOneResult = self.collection.insert_one(med_object.__dict__())
-            print(f'{s.Menu.External.INSERTED_SUCCESS} {insert_result.inserted_id}')
+
+            print(f'{s.Menu.External.INSERTED_SUCCESS} {insert_result.inserted_id}', end='\n\n')
 
     def _subtract_stock(self):
         raise NotImplementedError(s.Menu.Internal.subtract_string)
