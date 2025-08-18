@@ -65,6 +65,7 @@ class Menu:
             packed[s.Connections.name_str] = packed[s.Connections.name_str].title()
         except AssertionError:
             print(s.Menu.External.ONLY_LETTERS, end='\n\n')
+            return None
 
         try:
             med_object: Medication = Medication(*packed.values())
