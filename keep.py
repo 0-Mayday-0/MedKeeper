@@ -75,6 +75,11 @@ class Menu:
 
         return med_object
 
+    def _avoid_duplicate(self, med: Medication) -> bool:
+        strengths: list[dict[str, str | int]] = self.collection.find( {s.Connections.strength_str: float(med.get_strength)} ).to_list()
+
+        return bool(strengths)
+
     def _check_exists(self, medication_name: str) -> bool:
         exists: list[dict[str, str | int]] | None = self.collection.find( {s.Connections.name_str: medication_name} ).to_list()
         meds: list[Medication] = [Medication(doc[s.Connections.name_str],
@@ -126,11 +131,16 @@ class Menu:
         else:
             user_accepts: bool = self._check_exists(med_object.get_name)
 
-            if not user_accepts:
+            duplicate: bool = self._avoid_duplicate(med_object)
+
+            if duplicate:
+                self.clear_screen()
+                print(s.Menu.External.DUPLICATE_MED)
+            elif not user_accepts:
                 self.clear_screen()
                 print(s.Menu.External.USER_CANCEL)
             else:
-
+                self.clear_screen()
                 insert_result: InsertOneResult = self.collection.insert_one(med_object.__dict__())
 
                 print(f'{s.Menu.External.INSERTED_SUCCESS} {insert_result.inserted_id}', end='\n\n')

@@ -56,7 +56,7 @@ class Menu:
                                                 "Enter the current stock: ")
 
         exists: str = "Medication with this name already exists as:\n\n"
-        exists_sure: str = "Are you sure you want to add a copy or different strength? [0/1]: "
+        exists_sure: str = "Are you sure you want to add a different strength? [0/1]: "
 
         NOT_IMPLEMENTED: str = "Not currently implemented. Callback correct"
         INVALID_INPUT: str = "Invalid input, please try again."
@@ -64,6 +64,7 @@ class Menu:
         ONLY_LETTERS: str = "The name of the medication must only contain letters."
         INVALID_CHARACTERS: str = "One of the values entered has invalid characters."
         USER_CANCEL: str = "Operation cancelled by user, med insertion failed."
+        DUPLICATE_MED: str = "A medication with this strength already exists, duplicates are not allowed. Med insertion failed."
 
         INSERTED_SUCCESS: str = "Inserted med with ID:"
 
