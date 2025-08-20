@@ -6,6 +6,7 @@ from os import getenv
 from pymongo.results import InsertOneResult
 from pymongo.synchronous.collection import Collection
 from pymongo.synchronous.database import Database
+from pymongo.cursor import Cursor
 
 import strings as s
 from connections import ClientCreator
@@ -56,7 +57,7 @@ class Menu:
 
     @staticmethod
     def clear_screen() -> None:
-        r = spcall(s.Menu.Internal.clear_command)
+        spcall(s.Menu.Internal.clear_command)
 
     @staticmethod
     def _check_valid_add(packed: dict[str, str]) -> Medication | None:
@@ -74,6 +75,38 @@ class Menu:
 
         return med_object
 
+    def _check_exists(self, medication_name: str) -> bool:
+        exists: list[dict[str, str | int]] | None = self.collection.find( {s.Connections.name_str: medication_name} ).to_list()
+        meds: list[Medication] = [Medication(doc[s.Connections.name_str],
+                                             doc[s.Connections.strength_str],
+                                             doc[s.Connections.qty_str]) for doc in exists]
+        allowed_inputs: tuple[str, str] = s.Menu.Internal.yn_inputs
+        user_input: str = ""
+        user_invalid: bool = True
+
+        if not exists:
+            self.clear_screen()
+            return True
+
+        while exists and user_invalid:
+            print(s.Menu.External.exists, end='')
+
+            for med in meds:
+                print(f'{med.get_name}: {med.get_strength}{s.Menu.External.milligrams}\n'
+                      f'{s.Menu.External.stock}{med.get_qty}', end='\n\n')
+
+            user_input = input(s.Menu.External.exists_sure)
+            user_invalid = user_input not in allowed_inputs
+
+            if user_invalid:
+                self.clear_screen()
+                print(s.Menu.External.INVALID_INPUT)
+
+        return bool(int(user_input))
+
+
+
+
     def _add_medication(self) -> None:
         self.clear_screen()
         prompts: tuple[str, str, str] = s.Menu.External.add_med_prompts
@@ -88,11 +121,19 @@ class Menu:
         med_object = self._check_valid_add(user_packed)
 
         if not med_object:
+            self.clear_screen()
             print(s.Menu.External.INVALID_CHARACTERS, end='\n\n')
         else:
-            insert_result: InsertOneResult = self.collection.insert_one(med_object.__dict__())
+            user_accepts: bool = self._check_exists(med_object.get_name)
 
-            print(f'{s.Menu.External.INSERTED_SUCCESS} {insert_result.inserted_id}', end='\n\n')
+            if not user_accepts:
+                self.clear_screen()
+                print(s.Menu.External.USER_CANCEL)
+            else:
+
+                insert_result: InsertOneResult = self.collection.insert_one(med_object.__dict__())
+
+                print(f'{s.Menu.External.INSERTED_SUCCESS} {insert_result.inserted_id}', end='\n\n')
 
     def _subtract_stock(self):
         raise NotImplementedError(s.Menu.Internal.subtract_string)
@@ -146,10 +187,13 @@ class Menu:
                     ic(self.commands[user_input]())
 
                 except NotImplementedError as e:
+                    self.clear_screen()
                     print(f'{s.Menu.External.NOT_IMPLEMENTED}:\n{str(e)}', end='\n\n')
 
                 except KeyError:
+                    self.clear_screen()
                     print(s.Menu.External.INVALID_INPUT, end='\n\n')
+
         else:
             raise ConnectionError(s.Menu.External.NOT_CONNECTED)
 

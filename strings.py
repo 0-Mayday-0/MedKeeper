@@ -31,6 +31,10 @@ class Menu:
         edit_medication: str = 'c'
         quit_program: str = 'q'
 
+        id_header: str = '_'
+
+        yn_inputs: tuple[str, str] = ('0', '1')
+
         clear_command: str = 'cmd /c cls'
 
         add_string: str = "Add a medication"
@@ -44,16 +48,22 @@ class Menu:
     @dataclass(frozen=True)
     class External:
         command_prompt: str = "Command: "
+        milligrams: str = 'mg'
+        stock: str = "Stock: "
 
         add_med_prompts: tuple[str, str, str] = ("Enter the name of the medication: ",
                                                 "Enter the strength of the medication: ",
                                                 "Enter the current stock: ")
+
+        exists: str = "Medication with this name already exists as:\n\n"
+        exists_sure: str = "Are you sure you want to add a copy or different strength? [0/1]: "
 
         NOT_IMPLEMENTED: str = "Not currently implemented. Callback correct"
         INVALID_INPUT: str = "Invalid input, please try again."
         NOT_CONNECTED: str = "Something went wrong connecting to the DB."
         ONLY_LETTERS: str = "The name of the medication must only contain letters."
         INVALID_CHARACTERS: str = "One of the values entered has invalid characters."
+        USER_CANCEL: str = "Operation cancelled by user, med insertion failed."
 
         INSERTED_SUCCESS: str = "Inserted med with ID:"
 
