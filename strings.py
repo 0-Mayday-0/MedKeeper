@@ -29,6 +29,7 @@ class Menu:
         edit_stock: str = 'e'
         remove_medication: str = 'r'
         edit_medication: str = 'c'
+        display_meds: str = 'd'
         quit_program: str = 'q'
 
         id_header: str = '_'
@@ -43,6 +44,7 @@ class Menu:
         edit_string: str = "Edit the stock of a medication"
         remove_string: str = "Remove a medication"
         edit_medication_string: str = "Edit the name of a medication"
+        display_meds_string: str = "Display all medications and their stock"
         quit_string: str = "Quit"
 
     @dataclass(frozen=True)

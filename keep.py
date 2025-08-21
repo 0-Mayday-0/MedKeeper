@@ -35,6 +35,7 @@ class Menu:
             s.Menu.Internal.subtract_stock: self._subtract_stock,
             s.Menu.Internal.add_stock: self._add_stock,
             s.Menu.Internal.edit_stock: self._edit_stock,
+            s.Menu.Internal.display_meds: self._display_all,
             s.Menu.Internal.quit_program: quit
         }
 
@@ -44,6 +45,7 @@ class Menu:
                                             s.Menu.Internal.subtract_string,
                                             s.Menu.Internal.add_stock_string,
                                             s.Menu.Internal.edit_string,
+                                            s.Menu.Internal.display_meds_string,
                                             s.Menu.Internal.quit_string
                                             ]
 
@@ -159,6 +161,20 @@ class Menu:
 
     def _edit_medication(self):
         raise NotImplementedError(s.Menu.Internal.edit_medication_string)
+
+    def _display_all(self):
+        meds_with_id: list[dict[str, str | int]] = self.collection.find().to_list()
+        self.clear_screen()
+
+        for doc in meds_with_id:
+            doc.pop('_id')
+
+        meds: list[Medication] = [Medication(*doc.values()) for doc in meds_with_id]
+
+        for med in meds:
+            print(f'{med.get_name}: {med.get_strength}{s.Menu.External.milligrams}\n'
+                  f'{s.Menu.External.stock}{med.get_qty}', end='\n\n')
+
 
     async def _connect(self) -> Coroutine[None, MongoClient[str], MongoClient]:
         client_object: ClientCreator = ClientCreator(self.env_path)
