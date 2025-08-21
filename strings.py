@@ -32,7 +32,7 @@ class Menu:
         display_meds: str = 'd'
         quit_program: str = 'q'
 
-        id_header: str = '_'
+        id_header: str = '_id'
 
         yn_inputs: tuple[str, str] = ('0', '1')
 

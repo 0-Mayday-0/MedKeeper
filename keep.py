@@ -15,6 +15,7 @@ from asyncio import Task, create_task, run
 from icecream import ic
 from decimal import InvalidOperation, Decimal
 from subprocess import call as spcall
+from bson.objectid import ObjectId
 
 from medobj import Medication
 
@@ -71,22 +72,23 @@ class Menu:
             return None
 
         try:
-            med_object: Medication = Medication(*packed.values())
+            med_object: Medication = Medication(None, *packed.values())
+            ic(med_object)
         except InvalidOperation:
             return None
 
         return med_object
 
     def _avoid_duplicate(self, med: Medication) -> bool:
-        strengths: list[dict[str, str | int]] = self.collection.find( {s.Connections.strength_str: float(med.get_strength)} ).to_list()
+        strengths: list[dict[str, str | int]] = (self.collection.find( {s.Connections.name_str: med.get_name,
+                                                                       s.Connections.strength_str: float(med.get_strength)} )
+                                                 .to_list())
 
         return bool(strengths)
 
     def _check_exists(self, medication_name: str) -> bool:
         exists: list[dict[str, str | int]] | None = self.collection.find( {s.Connections.name_str: medication_name} ).to_list()
-        meds: list[Medication] = [Medication(doc[s.Connections.name_str],
-                                             doc[s.Connections.strength_str],
-                                             doc[s.Connections.qty_str]) for doc in exists]
+        meds: list[Medication] = [Medication(*doc.values()) for doc in exists]
         allowed_inputs: tuple[str, str] = s.Menu.Internal.yn_inputs
         user_input: str = ""
         user_invalid: bool = True
@@ -165,9 +167,6 @@ class Menu:
     def _display_all(self):
         meds_with_id: list[dict[str, str | int]] = self.collection.find().to_list()
         self.clear_screen()
-
-        for doc in meds_with_id:
-            doc.pop('_id')
 
         meds: list[Medication] = [Medication(*doc.values()) for doc in meds_with_id]
 
