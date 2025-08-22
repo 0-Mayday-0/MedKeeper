@@ -10,6 +10,9 @@ from pymongo.synchronous.database import Database
 from pymongo.errors import ServerSelectionTimeoutError
 from pymongo.cursor import Cursor
 
+from bson import json_util
+from bson import encode
+
 import strings as s
 from connections import ClientCreator
 from collections.abc import Coroutine, Callable, Mapping
@@ -17,7 +20,8 @@ from asyncio import Task, create_task, run
 from icecream import ic
 from decimal import InvalidOperation, Decimal
 from subprocess import call as spcall
-from bson.objectid import ObjectId
+
+
 
 from medobj import Medication
 
@@ -135,11 +139,9 @@ class Menu:
             return False
 
     def _find_name(self) -> None:
-        meds: list[Medication] = self._get_all_med_objects()
-        matched: list[Medication] = []
         user_invalid: bool = True
         partial_name: str = ''
-
+        matched: Cursor | None = None
 
         while user_invalid:
             partial_name = input(s.Menu.External.find_name)
@@ -151,11 +153,9 @@ class Menu:
                 print(s.Menu.External.ONLY_LETTERS, end='\n\n')
 
             else:
-                for med in meds:
-                    if re.match(pattern=re_match, string=med.get_name, flags=re.IGNORECASE):
-                        matched.append(med)
-                    else:
-                        continue
+                matched: Cursor = self.collection.find({s.Connections.name_str: re.compile(re_match, flags=re.IGNORECASE)})
+
+                matched: list[Medication] = [Medication(*doc.values()) for doc in matched]
 
         self.clear_screen()
         print(s.Menu.External.found_these.format(m=partial_name), end='\n\n')
