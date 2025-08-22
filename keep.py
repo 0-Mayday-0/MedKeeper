@@ -6,11 +6,12 @@ from os import getenv
 from pymongo.results import InsertOneResult
 from pymongo.synchronous.collection import Collection
 from pymongo.synchronous.database import Database
+from pymongo.errors import ServerSelectionTimeoutError
 from pymongo.cursor import Cursor
 
 import strings as s
 from connections import ClientCreator
-from collections.abc import Coroutine, Callable
+from collections.abc import Coroutine, Callable, Mapping
 from asyncio import Task, create_task, run
 from icecream import ic
 from decimal import InvalidOperation, Decimal
@@ -59,6 +60,13 @@ class Menu:
         self.collection: Collection | None = None
 
         self.connected: bool = bool(self.client)
+
+    def _get_all_med_docs(self) -> list[Mapping[str, str | int]]:
+        return self.collection.find().to_list()
+
+    def _get_all_med_objects(self) -> list[Medication]:
+        return [Medication(*doc.values()) for doc in self._get_all_med_docs()]
+
 
     @staticmethod
     def clear_screen() -> None:
@@ -167,10 +175,9 @@ class Menu:
         raise NotImplementedError(s.Menu.Internal.edit_medication_string)
 
     def _display_all(self):
-        meds_with_id: list[dict[str, str | int]] = self.collection.find().to_list()
         self.clear_screen()
 
-        meds: list[Medication] = [Medication(*doc.values()) for doc in meds_with_id]
+        meds: list[Medication] = self._get_all_med_objects()
 
         for index, med in enumerate(meds):
             print(f'{med.get_name}: {med.get_strength}{s.Menu.External.milligrams} {s.Menu.External.stock}{med.get_qty}', end=' '*4)
@@ -221,6 +228,10 @@ class Menu:
                 except KeyError:
                     self.clear_screen()
                     print(s.Menu.External.INVALID_INPUT, end='\n\n')
+
+                except ServerSelectionTimeoutError:
+                    self.clear_screen()
+                    print(s.Menu.External.HANDSHAKE_FAILED)
 
         else:
             raise ConnectionError(s.Menu.External.NOT_CONNECTED)

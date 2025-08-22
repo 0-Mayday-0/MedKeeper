@@ -67,9 +67,8 @@ class Menu:
         INVALID_CHARACTERS: str = "One of the values entered has invalid characters."
         USER_CANCEL: str = "Operation cancelled by user, med insertion failed."
         DUPLICATE_MED: str = "A medication with this strength already exists, duplicates are not allowed. Med insertion failed."
-
         INSERTED_SUCCESS: str = "Inserted med with ID:"
-
+        HANDSHAKE_FAILED: str = "Your IP is not allowed to make changes in the DB. Please contact the system administrator."
 
 
 @dataclass(frozen=True)
