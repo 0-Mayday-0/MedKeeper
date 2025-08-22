@@ -2,6 +2,7 @@
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from os import getenv
+import re
 
 from pymongo.results import InsertOneResult
 from pymongo.synchronous.collection import Collection
@@ -40,6 +41,7 @@ class Menu:
             s.Menu.Internal.add_stock: self._add_stock,
             s.Menu.Internal.edit_stock: self._edit_stock,
             s.Menu.Internal.display_meds: self._display_all,
+            s.Menu.Internal.find_name: self._find_name,
             s.Menu.Internal.quit_program: quit
         }
 
@@ -50,6 +52,7 @@ class Menu:
                                             s.Menu.Internal.add_stock_string,
                                             s.Menu.Internal.edit_string,
                                             s.Menu.Internal.display_meds_string,
+                                            s.Menu.Internal.find_name_string,
                                             s.Menu.Internal.quit_string
                                             ]
 
@@ -75,7 +78,7 @@ class Menu:
     @staticmethod
     def _check_valid_add(packed: dict[str, str]) -> Medication | None:
         try:
-            assert packed[s.Connections.name_str].isalpha()
+            assert packed[s.Connections.name_str].replace(' ', '').isalpha()
             packed[s.Connections.name_str] = packed[s.Connections.name_str].title()
         except AssertionError:
             print(s.Menu.External.ONLY_LETTERS, end='\n\n')
@@ -83,7 +86,6 @@ class Menu:
 
         try:
             med_object: Medication = Medication(None, *packed.values())
-            ic(med_object)
         except InvalidOperation:
             return None
 
@@ -123,7 +125,49 @@ class Menu:
 
         return bool(int(user_input))
 
+    @staticmethod
+    def _check_valid_find_name(partial_name) -> bool:
+        try:
+            assert partial_name.replace(' ', '').isalpha(), bool(partial_name)
+            return True
 
+        except AssertionError:
+            return False
+
+    def _find_name(self) -> None:
+        meds: list[Medication] = self._get_all_med_objects()
+        matched: list[Medication] = []
+        user_invalid: bool = True
+        partial_name: str = ''
+
+
+        while user_invalid:
+            partial_name = input(s.Menu.External.find_name)
+            re_match: str = f".*({partial_name}).*"
+            user_invalid = not self._check_valid_find_name(partial_name)
+
+            if user_invalid:
+                self.clear_screen()
+                print(s.Menu.External.ONLY_LETTERS, end='\n\n')
+
+            else:
+                for med in meds:
+                    if re.match(pattern=re_match, string=med.get_name, flags=re.IGNORECASE):
+                        matched.append(med)
+                    else:
+                        continue
+
+        self.clear_screen()
+        print(s.Menu.External.found_these.format(m=partial_name), end='\n\n')
+
+
+
+        for index, med in enumerate(matched):
+            print(f'{med.get_name}: {med.get_strength}{s.Menu.External.milligrams} {s.Menu.External.stock}{med.get_qty}', end=' '*4)
+
+            if index % self.columns_print == self.columns_print-1:
+                print()
+        print('\n')
 
 
     def _add_medication(self) -> None:
@@ -183,6 +227,7 @@ class Menu:
             print(f'{med.get_name}: {med.get_strength}{s.Menu.External.milligrams} {s.Menu.External.stock}{med.get_qty}', end=' '*4)
             if index % self.columns_print == self.columns_print -1:
                 print('\n')
+        print()
 
 
     async def _connect(self) -> Coroutine[None, MongoClient[str], MongoClient]:

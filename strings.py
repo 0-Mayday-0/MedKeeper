@@ -30,6 +30,7 @@ class Menu:
         remove_medication: str = 'r'
         edit_medication: str = 'c'
         display_meds: str = 'd'
+        find_name: str = "f"
         quit_program: str = 'q'
 
         id_header: str = '_id'
@@ -45,6 +46,7 @@ class Menu:
         remove_string: str = "Remove a medication"
         edit_medication_string: str = "Edit the name of a medication"
         display_meds_string: str = "Display all medications and their stock"
+        find_name_string: str = "Find a medication by name"
         quit_string: str = "Quit"
 
     @dataclass(frozen=True)
@@ -59,6 +61,10 @@ class Menu:
 
         exists: str = "Medication with this name already exists as:\n\n"
         exists_sure: str = "Are you sure you want to add a different strength? [0/1]: "
+
+        find_name: str = "Name of the medication to find (can be partial): "
+
+        found_these: str = "Found the following medications with name {m}:"
 
         NOT_IMPLEMENTED: str = "Not currently implemented. Callback correct"
         INVALID_INPUT: str = "Invalid input, please try again."
