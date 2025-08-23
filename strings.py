@@ -59,6 +59,10 @@ class Menu:
                                                 "Enter the strength of the medication: ",
                                                 "Enter the current stock: ")
 
+        remove_med_prompt: str = "Enter the full name of the medication to remove: "
+        select_one_remove: str = "Select one of the strengths to remove (numbers only): "
+        remove_sure: str = "Are you sure you want to remove {m} with strength {s} [0/1]?: "
+
         exists: str = "Medication with this name already exists as:\n\n"
         exists_sure: str = "Are you sure you want to add a different strength? [0/1]: "
 
@@ -70,11 +74,17 @@ class Menu:
         INVALID_INPUT: str = "Invalid input, please try again."
         NOT_CONNECTED: str = "Something went wrong connecting to the DB."
         ONLY_LETTERS: str = "The name of the medication must only contain letters."
+        ONLY_NUMBERS: str = "Strength of the medication must only contain numbers."
+        NOT_EMPTY_OR_SPECIAL: str = "The name of the medication must not be empty or contain any other character than letters."
         INVALID_CHARACTERS: str = "One of the values entered has invalid characters."
-        USER_CANCEL: str = "Operation cancelled by user, med insertion failed."
+        USER_CANCEL: str = "Operation cancelled by user, failed to edit DB."
+        STRENGTH_NOT_EMPTY: str = "Strength of the medication must not be empty."
         DUPLICATE_MED: str = "A medication with this strength already exists, duplicates are not allowed. Med insertion failed."
+        NO_SUCH_STRENGTH: str = "Strength of the medication did not match any existing ones, try again."
         INSERTED_SUCCESS: str = "Inserted med with ID:"
+        REMOVE_SUCCESS: str = "Removed med with ID:"
         HANDSHAKE_FAILED: str = "Your IP is not allowed to make changes in the DB. Please contact the system administrator."
+        NO_MEDS: str = "No medications found with the name \"{m}\""
 
 
 @dataclass(frozen=True)
