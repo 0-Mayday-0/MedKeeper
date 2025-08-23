@@ -4,21 +4,18 @@ from dotenv import load_dotenv
 from os import getenv
 import re
 
-from pymongo.results import InsertOneResult
+from pymongo.results import InsertOneResult, DeleteResult
 from pymongo.synchronous.collection import Collection
 from pymongo.synchronous.database import Database
 from pymongo.errors import ServerSelectionTimeoutError
 from pymongo.cursor import Cursor
-
-from bson import json_util
-from bson import encode
 
 import strings as s
 from connections import ClientCreator
 from collections.abc import Coroutine, Callable, Mapping
 from asyncio import Task, create_task, run
 from icecream import ic
-from decimal import InvalidOperation, Decimal
+from decimal import InvalidOperation, Decimal, getcontext
 from subprocess import call as spcall
 
 
@@ -30,8 +27,11 @@ class Menu:
     def __init__(self, env_path: str) -> None:
         load_dotenv(env_path)
 
-        self.columns_print: int = 3
-        self.spacing: int = 4
+        self.columns_print: int = 3 #the amount of columns for printing available meds
+        self.spacing: int = 4 #the spacing between columns
+        self.ndigits: int = 2 #amount of decimal digits for Decimal() objects
+
+        getcontext().prec = self.ndigits #set context for Decimal()
 
         self.env_path = env_path
         self.cluster: str = getenv(s.Connections.cluster)
@@ -168,7 +168,7 @@ class Menu:
 
             if index % self.columns_print == self.columns_print-1:
                 print(flush=True)
-        print(flush=True)
+        print('\n', flush=True)
 
 
     def _add_medication(self) -> None:
@@ -213,8 +213,102 @@ class Menu:
     def _edit_stock(self):
         raise NotImplementedError(s.Menu.Internal.edit_string)
 
+
+    @staticmethod
+    def _check_valid_name(medication_name: str) -> bool:
+        try:
+            assert medication_name.replace(' ', '').lower().isalpha(), bool(medication_name)
+            return True
+        except AssertionError:
+            return False
+
+    def _find_remove(self, medication_name) -> list[Medication] | list[None]:
+        found_docs: list[Mapping[str, str | int]] = self.collection.find( {s.Connections.name_str: medication_name.title()} ).to_list()
+
+        return [Medication(*doc.values()) for doc in found_docs]
+
+    @staticmethod
+    def _check_valid_strength(strength: str) -> Decimal | None:
+        try:
+            assert bool(strength)
+            return Decimal(strength)
+
+        except AssertionError:
+            print(s.Menu.External.STRENGTH_NOT_EMPTY, end='\n\n')
+
+        except InvalidOperation:
+            print(s.Menu.External.ONLY_NUMBERS, end='\n\n')
+
     def _remove_medication(self):
-        raise NotImplementedError(s.Menu.Internal.remove_string)
+        user_invalid: bool = True
+        user_input: str = ''
+        med_name: str = ''
+
+        while user_invalid:
+            self.clear_screen()
+            user_input = input(s.Menu.External.remove_med_prompt)
+            user_invalid = not self._check_valid_name(user_input)
+
+            if user_invalid:
+                print(s.Menu.External.NOT_EMPTY_OR_SPECIAL, end='\n\n')
+
+            else:
+                self.clear_screen()
+                break
+
+        user_invalid: bool = True
+        meds_found: list[Medication] | list[None] = self._find_remove(user_input)
+        to_remove: Medication | None = None
+
+        med_name = user_input
+
+        while user_invalid and meds_found:
+            print(s.Menu.External.found_these.format(m=med_name), end='\n\n')
+
+            for med in meds_found:
+                print(f'{str(med)}')
+
+            user_input = input(f'\n{s.Menu.External.select_one_remove}')
+            user_input: Decimal | None = self._check_valid_strength(user_input)
+            user_invalid = not bool(user_input)
+
+            try:
+                for med in meds_found:
+                    if not med.get_strength == user_input:
+                        continue
+                    else:
+                        to_remove = med
+                assert to_remove
+
+            except AssertionError:
+                self.clear_screen()
+                user_invalid = True
+                print(s.Menu.External.NO_SUCH_STRENGTH, end='\n\n')
+
+        if not meds_found:
+            print(s.Menu.External.NO_MEDS.format(m=user_input), end='\n\n')
+
+
+        allowed_inputs: tuple[str, str] = s.Menu.Internal.yn_inputs
+        user_invalid = True
+
+        while user_invalid and meds_found:
+            user_input = input(s.Menu.External.remove_sure.format(m=to_remove.get_name,
+                                                                  s=to_remove.get_strength))
+
+            user_invalid = not user_input in allowed_inputs
+
+            if user_invalid:
+                print(s.Menu.External.INVALID_INPUT)
+
+        if meds_found:
+            user_input: bool = bool(int(user_input))
+            self.clear_screen()
+            if user_input:
+                del_result: DeleteResult = self.collection.delete_one( to_remove.__dict__() )
+                print(s.Menu.External.REMOVE_SUCCESS, to_remove.get_id, f'Ack={del_result.acknowledged}', end='\n\n')
+            else:
+                print(s.Menu.External.USER_CANCEL, end='\n\n')
 
     def _edit_medication(self):
         raise NotImplementedError(s.Menu.Internal.edit_medication_string)
@@ -228,7 +322,7 @@ class Menu:
             print(f'{str(med)}', end=' '*self.spacing)
             if index % self.columns_print == self.columns_print -1:
                 print(flush=True)
-        print(flush=True)
+        print('\n', flush=True)
 
 
     async def _connect(self) -> Coroutine[None, MongoClient[str], MongoClient]:
