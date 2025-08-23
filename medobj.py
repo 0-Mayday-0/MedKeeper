@@ -16,6 +16,9 @@ class Medication:
     def __repr__(self) -> str:
         return f'Med({self.id=}, {self.name=}, {self.strength=}, {self.qty=})'
 
+    def __str__(self) -> str:
+        return f'{self.name}: {self.strength}{s.Menu.External.milligrams} {s.Menu.External.stock}{self.qty}'
+
     def __dict__(self) -> dict:
         return {s.Connections.name_str: self.name,
                 s.Connections.strength_str: round(float(self.strength), self.ndecimals),

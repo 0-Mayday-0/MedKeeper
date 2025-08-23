@@ -31,6 +31,7 @@ class Menu:
         load_dotenv(env_path)
 
         self.columns_print: int = 3
+        self.spacing: int = 4
 
         self.env_path = env_path
         self.cluster: str = getenv(s.Connections.cluster)
@@ -163,11 +164,11 @@ class Menu:
 
 
         for index, med in enumerate(matched):
-            print(f'{med.get_name}: {med.get_strength}{s.Menu.External.milligrams} {s.Menu.External.stock}{med.get_qty}', end=' '*4)
+            print(f'{str(med)}', end=' '*self.spacing)
 
             if index % self.columns_print == self.columns_print-1:
-                print()
-        print('\n')
+                print(flush=True)
+        print(flush=True)
 
 
     def _add_medication(self) -> None:
@@ -224,10 +225,10 @@ class Menu:
         meds: list[Medication] = self._get_all_med_objects()
 
         for index, med in enumerate(meds):
-            print(f'{med.get_name}: {med.get_strength}{s.Menu.External.milligrams} {s.Menu.External.stock}{med.get_qty}', end=' '*4)
+            print(f'{str(med)}', end=' '*self.spacing)
             if index % self.columns_print == self.columns_print -1:
-                print('\n')
-        print()
+                print(flush=True)
+        print(flush=True)
 
 
     async def _connect(self) -> Coroutine[None, MongoClient[str], MongoClient]:
