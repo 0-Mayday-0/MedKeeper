@@ -3,6 +3,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Atomic:
     increment: str = '$inc'
+    set: str = '$set'
 
 @dataclass(frozen=True)
 class Connections:
@@ -78,6 +79,10 @@ class Menu:
         select_one_subtract: str = "Select one of the strengths to subtract stock from (numbers only): "
         subtract_how_many: str = "How many pills to subtract from stock? (numbers only): "
 
+        prompt_edit_stock: str = "Enter the full name of the medication to edit the stock of: "
+        select_one_edit: str = "Select the strength of the medication to edit (numbers only): "
+        set_to_what: str = "Enter the stock to set this medication to (numbers only): "
+
         find_name: str = "Name of the medication to find (can be partial): "
 
         found_these: str = "Found the following medications with name {m}:"
@@ -98,6 +103,7 @@ class Menu:
         INSERTED_SUCCESS: str = "Inserted med with ID:"
         REMOVE_SUCCESS: str = "Removed med with ID:"
         SUBTRACT_SUCCESS: str = "Subtracted {p} pills from med named {m}. Med ID: {i}"
+        EDIT_SUCCESS: str = "Set medication {m}'s stock to {p}. Med ID: {i}"
         HANDSHAKE_FAILED: str = "Your IP is not allowed to make changes in the DB. Please contact the system administrator."
         NO_MEDS: str = "No medications found with the name \"{m}\""
 
