@@ -610,7 +610,7 @@ class Menu:
                 user_input = input(f'\n{s.Menu.External.command_prompt}').lower()
 
                 try:
-                    ic(self.commands[user_input]())
+                    self.commands[user_input]()
 
                 except NotImplementedError as e:
                     self.clear_screen()
