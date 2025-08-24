@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
+class Atomic:
+    increment: str = '$inc'
+
+@dataclass(frozen=True)
 class Connections:
     protocol: str = 'mongodb+srv'
     root_domain: str = 'mongodb'
@@ -70,6 +74,10 @@ class Menu:
         exists: str = "Medication with this name already exists as:\n\n"
         exists_sure: str = "Are you sure you want to add a different strength? [0/1]: "
 
+        prompt_subtract: str = "Type in the full name of the medication to subtract stock from: "
+        select_one_subtract: str = "Select one of the strengths to subtract stock from (numbers only): "
+        subtract_how_many: str = "How many pills to subtract from stock? (numbers only): "
+
         find_name: str = "Name of the medication to find (can be partial): "
 
         found_these: str = "Found the following medications with name {m}:"
@@ -83,10 +91,12 @@ class Menu:
         INVALID_CHARACTERS: str = "One of the values entered has invalid characters."
         USER_CANCEL: str = "Operation cancelled by user, failed to edit DB."
         STRENGTH_NOT_EMPTY: str = "Strength of the medication must not be empty."
-        DUPLICATE_MED: str = "A medication with this strength already exists, duplicates are not allowed. Med insertion failed."
+        STOCK_OVERLOAD: str = "Cannot remove {p} pills from medication with stock {m}. Database modification failed."
+        DUPLICATE_MED: str = "A medication with this strength already exists, duplicates are not allowed. Database modification failed."
         NO_SUCH_STRENGTH: str = "Strength of the medication did not match any existing ones, try again."
         INSERTED_SUCCESS: str = "Inserted med with ID:"
         REMOVE_SUCCESS: str = "Removed med with ID:"
+        SUBTRACT_SUCCESS: str = "Subtracted {p} pills from med named {m}. Med ID: {i}"
         HANDSHAKE_FAILED: str = "Your IP is not allowed to make changes in the DB. Please contact the system administrator."
         NO_MEDS: str = "No medications found with the name \"{m}\""
 

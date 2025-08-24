@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from os import getenv
 import re
 
-from pymongo.results import InsertOneResult, DeleteResult
+from pymongo.results import InsertOneResult, DeleteResult, UpdateResult
 from pymongo.synchronous.collection import Collection
 from pymongo.synchronous.database import Database
 from pymongo.errors import ServerSelectionTimeoutError
@@ -205,7 +205,97 @@ class Menu:
                 print(f'{s.Menu.External.INSERTED_SUCCESS} {insert_result.inserted_id}', end='\n\n')
 
     def _subtract_stock(self):
-        raise NotImplementedError(s.Menu.Internal.subtract_string)
+        user_invalid: bool = True
+        user_input: str = ''
+        found_meds: list[Medication] | list[None] = []
+
+        self.clear_screen()
+
+        while user_invalid and not found_meds:
+
+            user_input = input(s.Menu.External.prompt_subtract)
+
+            user_invalid = not self._check_valid_name(user_input)
+
+            if user_invalid:
+                self.clear_screen()
+                print(s.Menu.External.ONLY_LETTERS, end='\n\n')
+
+            else:
+                found_meds = self._find_remove(user_input.title())
+
+
+        if not found_meds:
+            self.clear_screen()
+            print(s.Menu.External.NO_MEDS.format(m=user_input), end='\n\n')
+
+        else:
+            med_name: str = user_input
+            user_invalid = True
+
+        selected: Medication | None = None
+
+        while user_invalid and found_meds:
+            print(s.Menu.External.found_these.format(m=med_name), end='\n\n')
+
+            for med in found_meds:
+                print(f'{str(med)}')
+
+            print()
+
+            user_input = input(s.Menu.External.select_one_subtract)
+
+            user_input: Decimal | None = self._check_valid_strength(user_input)
+
+            user_invalid = not bool(user_input)
+
+            if user_invalid:
+                self.clear_screen()
+                print(s.Menu.External.ONLY_NUMBERS, end='\n\n')
+            else:
+                for med in found_meds:
+                    if user_input == med.get_strength:
+                        selected = med
+
+            if not selected:
+                self.clear_screen()
+                print(s.Menu.External.NO_SUCH_STRENGTH)
+
+        user_invalid = True
+
+        while user_invalid and selected:
+            user_input: str = input(s.Menu.External.subtract_how_many)
+
+            user_input: Decimal | None = self._check_valid_strength(user_input) #rename this function, checks if valid decimal
+
+            user_invalid = not bool(user_input)
+
+            if user_invalid:
+                self.clear_screen()
+                print(s.Menu.External.ONLY_NUMBERS, end='\n\n')
+
+            else:
+                user_invalid = user_input > selected.get_qty
+
+                if user_invalid:
+                    self.clear_screen()
+                    print(s.Menu.External.STOCK_OVERLOAD.format(p=user_input,
+                                                                m=selected.get_qty))
+
+                else:
+                    update_values: dict[str, dict[str, float]] = {s.Atomic.increment: {s.Connections.qty_str: float(-user_input)}}
+
+                    update_result: UpdateResult = self.collection.update_one(filter=selected.__dict__(), update=update_values)
+
+                    self.clear_screen()
+
+                    print(s.Menu.External.SUBTRACT_SUCCESS.format(p=user_input,
+                                                                  m=selected.get_name,
+                                                                  i=selected.get_id),
+                          f'Ack={update_result.acknowledged}',end='\n\n')
+
+
+
 
     def _add_stock(self):
         user_invalid: bool = True
