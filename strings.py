@@ -63,6 +63,10 @@ class Menu:
         select_one_remove: str = "Select one of the strengths to remove (numbers only): "
         remove_sure: str = "Are you sure you want to remove {m} with strength {s} [0/1]?: "
 
+        prompt_add_stock: str = "Enter the full name of the medication to add pills to: "
+        select_one_add: str = "Select one of the strengths to add pills to (numbers only): )"
+        add_how_many: str = "How many pills to add? (numbers only): "
+
         exists: str = "Medication with this name already exists as:\n\n"
         exists_sure: str = "Are you sure you want to add a different strength? [0/1]: "
 
