@@ -369,16 +369,16 @@ class Menu:
 
             else:
                 update_values: dict[str, dict[str, float]] = {
-                    s.Atomic.increment: {s.Connections.qty_str: float(-user_input)}}
+                    s.Atomic.increment: {s.Connections.qty_str: float(user_input)}}
 
                 update_result: UpdateResult = self.collection.update_one(filter=selected.__dict__(),
                                                                          update=update_values)
 
                 self.clear_screen()
 
-                print(s.Menu.External.SUBTRACT_SUCCESS.format(p=user_input,
-                                                              m=selected.get_name,
-                                                              i=selected.get_id),
+                print(s.Menu.External.ADD_SUCCESS.format(p=user_input,
+                                                         m=selected.get_name,
+                                                         i=selected.get_id),
                       f'Ack={update_result.acknowledged}', end='\n\n')
 
     def _edit_stock(self):

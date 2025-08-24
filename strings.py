@@ -68,7 +68,7 @@ class Menu:
         remove_sure: str = "Are you sure you want to remove {m} with strength {s} [0/1]?: "
 
         prompt_add_stock: str = "Enter the full name of the medication to add pills to: "
-        select_one_add: str = "Select one of the strengths to add pills to (numbers only): )"
+        select_one_add: str = "Select one of the strengths to add pills to (numbers only): "
         add_how_many: str = "How many pills to add? (numbers only): "
 
         exists: str = "Medication with this name already exists as:\n\n"
@@ -94,6 +94,7 @@ class Menu:
         STOCK_OVERLOAD: str = "Cannot remove {p} pills from medication with stock {m}. Database modification failed."
         DUPLICATE_MED: str = "A medication with this strength already exists, duplicates are not allowed. Database modification failed."
         NO_SUCH_STRENGTH: str = "Strength of the medication did not match any existing ones, try again."
+        ADD_SUCCESS: str = "Successfully added {p} pils to medication with name {m}. Med ID: {i}"
         INSERTED_SUCCESS: str = "Inserted med with ID:"
         REMOVE_SUCCESS: str = "Removed med with ID:"
         SUBTRACT_SUCCESS: str = "Subtracted {p} pills from med named {m}. Med ID: {i}"
