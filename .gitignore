@@ -2,3 +2,5 @@ credentials/
 testing.py
 .idea/
 __pycache__/
+prints/*.txt
+*.ps1

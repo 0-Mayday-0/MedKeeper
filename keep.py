@@ -18,6 +18,7 @@ from icecream import ic
 from decimal import InvalidOperation, Decimal, getcontext
 from subprocess import call as spcall
 
+from datetime import datetime
 
 
 from medobj import Medication
@@ -47,6 +48,7 @@ class Menu:
             s.Menu.Internal.edit_stock: self._edit_stock,
             s.Menu.Internal.display_meds: self._display_all,
             s.Menu.Internal.find_name: self._find_name,
+            s.Menu.Internal.generate_report: self._generate_med_report,
             s.Menu.Internal.quit_program: quit
         }
 
@@ -58,6 +60,7 @@ class Menu:
                                             s.Menu.Internal.edit_string,
                                             s.Menu.Internal.display_meds_string,
                                             s.Menu.Internal.find_name_string,
+                                            s.Menu.Internal.generate_report_string,
                                             s.Menu.Internal.quit_string
                                             ]
 
@@ -627,6 +630,18 @@ class Menu:
         else:
             raise ConnectionError(s.Menu.External.NOT_CONNECTED)
 
+    def _generate_med_report(self) -> None:
+        self.clear_screen()
+        open(s.Paths.med_reports_path, 'w').close()
+
+        all_meds: list[Medication] = self._get_all_med_objects()
+        report_generated_at: datetime = datetime.now()
+
+        for med in all_meds:
+            with open(s.Paths.med_reports_path, 'a') as med_report:
+                print(f'{med.get_name} ({med.get_strength}mg): {med.get_qty} pills\n\n{'-'*20}\n', file=med_report)
+
+        print(s.Menu.External.REPORT_GENERATED.format(d=report_generated_at.strftime('%d/%m/%Y - %H:%M:%S')))
 
 
 async def main():
