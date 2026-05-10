@@ -36,6 +36,7 @@ class Menu:
         edit_medication: str = 'c'
         display_meds: str = 'd'
         find_name: str = "f"
+        generate_report: str = 'g'
         quit_program: str = 'q'
 
         id_header: str = '_id'
@@ -52,6 +53,7 @@ class Menu:
         edit_medication_string: str = "Edit the name of a medication"
         display_meds_string: str = "Display all medications and their stock"
         find_name_string: str = "Find a medication by name"
+        generate_report_string: str = "Generate med report for all medications"
         quit_string: str = "Quit"
 
     @dataclass(frozen=True)
@@ -106,8 +108,10 @@ class Menu:
         EDIT_SUCCESS: str = "Set medication {m}'s stock to {p}. Med ID: {i}"
         HANDSHAKE_FAILED: str = "Your IP is not allowed to make changes in the DB. Please contact the system administrator."
         NO_MEDS: str = "No medications found with the name \"{m}\""
+        REPORT_GENERATED: str = "Report generated at {d}"
 
 
 @dataclass(frozen=True)
 class Paths:
     environment_path: str = ".\\credentials\\creds.env"
+    med_reports_path: str = ".\\prints\\meds.txt"
