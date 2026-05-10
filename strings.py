@@ -109,9 +109,11 @@ class Menu:
         HANDSHAKE_FAILED: str = "Your IP is not allowed to make changes in the DB. Please contact the system administrator."
         NO_MEDS: str = "No medications found with the name \"{m}\""
         REPORT_GENERATED: str = "Report generated at {d}"
+        PRINTING_REPORT: str = "Printing med report..."
 
 
 @dataclass(frozen=True)
 class Paths:
     environment_path: str = ".\\credentials\\creds.env"
     med_reports_path: str = ".\\prints\\meds.txt"
+    printer_executable: str = "print_report.exe"

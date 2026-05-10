@@ -17,8 +17,10 @@ from asyncio import Task, create_task, run
 from icecream import ic
 from decimal import InvalidOperation, Decimal, getcontext
 from subprocess import call as spcall
+from os import system
 
 from datetime import datetime
+import sys
 
 
 from medobj import Medication
@@ -637,10 +639,15 @@ class Menu:
         all_meds: list[Medication] = self._get_all_med_objects()
         report_generated_at: datetime = datetime.now()
 
+        with open(s.Paths.med_reports_path, 'a') as med_report:
+            print(f'MED REPORT - {report_generated_at.strftime('%d/%m/%Y - %H:%M:%S')}\n\n{'-' * 20}\n', file=med_report)
+
         for med in all_meds:
             with open(s.Paths.med_reports_path, 'a') as med_report:
                 print(f'{med.get_name} ({med.get_strength}mg): {med.get_qty} pills\n\n{'-'*20}\n', file=med_report)
 
+        print(s.Menu.External.PRINTING_REPORT)
+        system(s.Paths.printer_executable)
         print(s.Menu.External.REPORT_GENERATED.format(d=report_generated_at.strftime('%d/%m/%Y - %H:%M:%S')))
 
 
