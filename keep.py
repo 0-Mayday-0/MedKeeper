@@ -637,6 +637,7 @@ class Menu:
         open(s.Paths.med_reports_path, 'w').close()
 
         all_meds: list[Medication] = self._get_all_med_objects()
+        all_meds = sorted(all_meds, key=lambda medication: medication.get_name)
         report_generated_at: datetime = datetime.now()
 
         with open(s.Paths.med_reports_path, 'a') as med_report:
@@ -647,7 +648,7 @@ class Menu:
                 print(f'{med.get_name} ({med.get_strength}mg): {med.get_qty} pills\n\n{'-'*20}\n', file=med_report)
 
         print(s.Menu.External.PRINTING_REPORT)
-        system(s.Paths.printer_executable)
+        system(s.Menu.Internal.print_command.format(mac=getenv(s.Connections.printer_mac)))
         print(s.Menu.External.REPORT_GENERATED.format(d=report_generated_at.strftime('%d/%m/%Y - %H:%M:%S')))
 
 
