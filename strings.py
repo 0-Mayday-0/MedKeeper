@@ -18,6 +18,8 @@ class Connections:
     database: str = "DB"
     collection: str = "COLLECTION"
 
+    printer_mac: str = "PRINTER_MAC"
+
     name_str: str = 'name'
     strength_str: str = 'strength'
     qty_str: str = 'qty'
@@ -44,6 +46,7 @@ class Menu:
         yn_inputs: tuple[str, str] = ('0', '1')
 
         clear_command: str = 'cmd /c cls'
+        print_command: str = 'python ./cat-printer/printer.py ./prints/meds.txt -d -A {mac} -D --assume-text'
 
         add_string: str = "Add a medication"
         subtract_string: str = "Subtract from stock"
